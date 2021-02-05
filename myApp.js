@@ -1,10 +1,19 @@
 var express = require('express');
-var app = express();
 require('dotenv').config()
+var bodyParser = require('body-parser')
+var app = express();
 
 
+app.use(function(req,res,next){
+    console.log(req.method+" "+req.path+" - "+req.ip)
+    next();
+})
 
 
+app.use(bodyParser.urlencoded({ extended: false }))
+ 
+// parse application/json
+app.use(bodyParser.json())
 
 
 app.get("/", function(req,res){
@@ -15,9 +24,6 @@ app.get("/", function(req,res){
 app.use(express.static(__dirname+"/public"));
 
 
-// app.get("/json",function(req,res){
-//     res.json({"message": "Hello json"})
-// });
 
 
 app.get("/json",function(req,res){
@@ -30,8 +36,29 @@ app.get("/json",function(req,res){
     }
 });
 
+function getTheCurrentTimeString(){
+    return new Date().toString();
+}
 
+app.get("/now", function(req,res,next){
+    req.time = getTheCurrentTimeString();
+    next();
+},function(req,res){
+    res.json({time: req.time});
+})
 
+app.get("/:word/echo", function(req,res){
+    res.json({echo: req.params.word});
+});
+
+app.get("/name",function(req,res){
+    res.json({name: req.query.first + " " + req.query.last})
+    
+});
+
+app.post("/name",function(req,res){
+    res.json({name: req.body.first + " " + req.body.last})
+});
 
 
 
